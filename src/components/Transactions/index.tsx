@@ -1,14 +1,25 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from '../../services/api';
 import {    
     Container,
 } from './styles';
 
+interface ITransactions {
+    id: number;
+    title: string;
+    type: string;
+    category: string;
+    amount: number;
+    createdAt: string;
+}
+
 export function Transactions() {
+    const [ transactions, setTransactions ] = useState<ITransactions[]>([]);
 
     useEffect(() => {
         api.get('/transactions').then(response => {
-            console.log(response.data)
+            console.log(response.data.transactions)
+            setTransactions(response.data.transactions)
         })
     },[])
 
@@ -24,18 +35,19 @@ export function Transactions() {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>Desenvolvimento de website</td>
-                        <td className="deposit">R$12.000</td>
-                        <td>Desenvolvimento</td>
-                        <td>20/02/2021</td>
-                    </tr>
-                    <tr>
-                        <td>Alugue</td>
-                        <td className="withdrawl">- R$100</td>
-                        <td>Casa</td>
-                        <td>20/02/2021</td>
-                    </tr>
+                    {transactions.map(transactionMapped => (
+                        <tr key={transactionMapped.id}>
+                            <td>{transactionMapped.title}</td>
+                            <td className={transactionMapped.type}>
+                                {new Intl.NumberFormat('pt-BR', {
+                                    style: 'currency',
+                                    currency: 'BRL'
+                                }).format(transactionMapped.amount)}
+                            </td>
+                            <td>{transactionMapped.category}</td>
+                            <td>{new Intl.DateTimeFormat('pt-BR').format(new Date(transactionMapped.createdAt))}</td>
+                        </tr>
+                    ))}
                 </tbody>
             </table>
         </Container>
